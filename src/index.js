@@ -1,9 +1,8 @@
 // підключення бібліотек
 // npm i --save lodash.debounce
 // npm i notiflix
+import { fetchCountries } from './js/fetchCountries';
 import Notiflix from 'notiflix';
-import Notiflix from 'notiflix';
-import debounce from 'lodash.debounce';
 import debounce from 'lodash.debounce';
 
 import './css/styles.css';
@@ -14,24 +13,6 @@ const cardEl = document.querySelector('.country-info');
 const DEBOUNCE_DELAY = 300;
 
 inputEl.addEventListener('input', debounce(onFormSearch, DEBOUNCE_DELAY));
-
-const fetchCountries = name => {
-  return fetch(
-    `https://restcountries.com/v3.1/name/${name}?fields=,name,capital,population,flags,languages`
-  )
-    .then(response => {
-      if (!response.ok) {
-        if (response.status === 404) {
-          return [];
-        }
-        throw new Error(response.status);
-      }
-      return response.json();
-    })
-    .catch(error => {
-      console.error(error);
-    });
-};
 
 function onFormSearch(evt) {
   evt.preventDefault();
@@ -59,9 +40,9 @@ function onFormSearch(evt) {
 function renderCountryList(countries) {
   const markup = countries
     .map(country => {
-      return `<div>
-      <img src="${country.flags.svg}" alt="Flag of ${country.name.official}" width="30" hight="20">
-         <p>${country.name.official}</p>
+      return `<div class="country-info">
+      <img src="${country.flags.svg}" alt="Flag of ${country.name.official}" width="70">
+         <p class="country-name">${country.name.official}</p>
                 </div>`;
     })
     .join('');
@@ -71,14 +52,16 @@ function renderCountryList(countries) {
 function renderOneCountry(countries) {
   const markup = countries
     .map(country => {
-      return `<div>
+      return `<div class="country-info">
       <img src="${country.flags.svg}" alt="Flag of ${
         country.name.official
-      }" width="30" hight="20">
-         <p>${country.name.official}</p>
-            <p><b>Capital</b>: ${country.capital}</p>
-            <p><b>Population</b>: ${country.population}</p>
-            <p><b>Languages</b>: ${Object.values(country.languages)} </p>
+      }" width="90">
+         <p class="country-name">${country.name.official}</p>
+            <p class="text-info">Capital: ${country.capital}</p>
+            <p class="text-info">Population: ${country.population}</p>
+            <p class="text-info">Languages: ${Object.values(
+              country.languages
+            )} </p>
                 </div>`;
     })
     .join('');
