@@ -2,12 +2,15 @@
 // npm i --save lodash.debounce
 // npm i notiflix
 import Notiflix from 'notiflix';
+import Notiflix from 'notiflix';
 import debounce from 'lodash.debounce';
+import debounce from 'lodash.debounce';
+
 import './css/styles.css';
 
 const DEBOUNCE_DELAY = 300;
 
-refs = {
+const refs = {
   inputEl: document.querySelector('#search-box'),
   listEl: document.querySelector('.country-list'),
   cardEl: document.querySelector('.country-info'),
@@ -15,6 +18,7 @@ refs = {
 
 // console.log(refs.inputEl);
 
+// _-------------------------------------------------------------------------
 refs.inputEl.addEventListener('input', debounce(onFormSearch, DEBOUNCE_DELAY));
 
 // отримання значення з інпуту
@@ -31,6 +35,7 @@ function onFormSearch(evt) {
     refs.listEl.innerHTML = '';
     refs.cardEl.innerHTML = '';
   }
+
   // проміс отримання списку країн з сайту
   function fetchList(countryID) {
     return fetch(`https://restcountries.com/v3.1/name/${countryID}`)
