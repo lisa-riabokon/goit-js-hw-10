@@ -8,106 +8,86 @@ import debounce from 'lodash.debounce';
 
 import './css/styles.css';
 
+const inputEl = document.querySelector('#search-box');
+const listEl = document.querySelector('.country-list');
+const cardEl = document.querySelector('.country-info');
 const DEBOUNCE_DELAY = 300;
 
-const refs = {
-  inputEl: document.querySelector('#search-box'),
-  listEl: document.querySelector('.country-list'),
-  cardEl: document.querySelector('.country-info'),
+inputEl.addEventListener('input', debounce(onFormSearch, DEBOUNCE_DELAY));
+
+const fetchCountries = name => {
+  return fetch(
+    `https://restcountries.com/v3.1/name/${name}?fields=,name,capital,population,flags,languages`
+  )
+    .then(response => {
+      if (!response.ok) {
+        if (response.status === 404) {
+          return [];
+        }
+        throw new Error(response.status);
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.error(error);
+    });
 };
 
-// console.log(refs.inputEl);
-
-// _-------------------------------------------------------------------------
-refs.inputEl.addEventListener('input', debounce(onFormSearch, DEBOUNCE_DELAY));
-
-// отримання значення з інпуту
 function onFormSearch(evt) {
   evt.preventDefault();
-  // отримуєм значення інпут і очищуєм пробіли по боках
-  const searchQuery = evt.target.value.trim();
 
-  // перевіряєм чи не пустий інпут
-  if (searchQuery !== '') {
-    fetchList(searchQuery).then(chackList).catch(onFetchError);
-  } else {
-    //   очищуємо список і картку
-    refs.listEl.innerHTML = '';
-    refs.cardEl.innerHTML = '';
-  }
+  const trimmedValue = inputEl.value.trim();
+  onCleanHtml();
 
-  // проміс отримання списку країн з сайту
-  function fetchList(countryID) {
-    return fetch(`https://restcountries.com/v3.1/name/${countryID}`)
-      .then(response => {
-        return response.json();
-      })
-      .catch(onListError);
-  }
-
-  function chackList(countryID) {
-    let listValue = '';
-
-    if (countryID.length >= 10) {
-      Notiflix.Notify.info(
-        'Too many matches found. Please enter a more specific name.'
-      );
-    } else if (countryID.length === 0) {
-      Notiflix.Notify.failure('Oops, there is no country with that name');
-      refs.listEl.innerHTML = '';
-      refs.cardEl.innerHTML = '';
-    } else if (countryID.length >= 2 && countryID.length <= 10) {
-      refs.cardEl.innerHTML = '';
-      renderCountryList(countryID);
-    } else if (countryID.length === 1) {
-      refs.listEl.innerHTML = '';
-      renderOneCountry(countryID);
-    } else {
-      refs.listEl.innerHTML = '';
-      refs.cardEl.innerHTML = '';
-      Notiflix.Notify.failure('Oops, there is no country with that name');
-    }
-
-    function renderCountryList(ID) {
-      for (let i = 0; i < ID.length; i += 1) {
-        let markup = `
-        <div class="country-info country-item">
-        <img class="flag" src="${ID[i].flags.svg}" alt="" width="90">
-        <h2 class="title">${ID[i].name.official}<h/2>
-        </div>`;
-        listValue += markup;
+  if (trimmedValue !== '') {
+    fetchCountries(trimmedValue).then(foundData => {
+      if (foundData.length > 10) {
+        Notiflix.Notify.info(
+          'Too many matches found. Please enter a more specific name.'
+        );
+      } else if (foundData.length === 0) {
+        Notiflix.Notify.failure('Oops, there is no country with that name');
+      } else if (foundData.length >= 2 && foundData.length <= 10) {
+        renderCountryList(foundData);
+      } else if (foundData.length === 1) {
+        renderOneCountry(foundData);
       }
-      refs.listEl.innerHTML = listValue;
-    }
+    });
   }
 }
 
-function renderOneCountry(countryID) {
-  console.log(countryID);
-  const languageInCountry = Object.values(countyID[0].languages).join(',');
-
-  const markup = `
-  <ul class="country-list">
-  <div class="country-info country-item">
-        <img class="flag" src="${ID[i].flags.svg}" alt="" width="90">
-        <h2 class="title">${ID[i].name.official}<h/2>
-        </div>
-        <div class="country-info country-item">Capital: ${countyID[0].capital}<p></p></div>
-        <div class="country-info country-item">Population: ${countyID[0].population}<p></p></div>
-        <div class="country-info country-item">Languages: ${languageInCountry}<p></p></div>
-        </ul>`;
-
-  refs.cardEl.innerHTML = markup;
+function renderCountryList(countries) {
+  const markup = countries
+    .map(country => {
+      return `<div>
+      <img src="${country.flags.svg}" alt="Flag of ${country.name.official}" width="30" hight="20">
+         <p>${country.name.official}</p>
+                </div>`;
+    })
+    .join('');
+  listEl.innerHTML = markup;
 }
 
-function onFetchError(error) {
-  refs.listEl.innerHTML = '';
-  refs.cardEl.innerHTML = '';
-  Notiflix.Notify.failure('Oops, there is no country with that name');
+function renderOneCountry(countries) {
+  const markup = countries
+    .map(country => {
+      return `<div>
+      <img src="${country.flags.svg}" alt="Flag of ${
+        country.name.official
+      }" width="30" hight="20">
+         <p>${country.name.official}</p>
+            <p><b>Capital</b>: ${country.capital}</p>
+            <p><b>Population</b>: ${country.population}</p>
+            <p><b>Languages</b>: ${Object.values(country.languages)} </p>
+                </div>`;
+    })
+    .join('');
+
+  listEl.innerHTML = markup;
 }
 
-function onListError(error) {
-  refs.listEl.innerHTML = '';
-  refs.cardEl.innerHTML = '';
-  Notiflix.Notify.failure('Oops, there is no country with that name');
+// функція очищує назву країни та інфо про неї
+function onCleanHtml() {
+  listEl.innerHTML = '';
+  cardEl.innerHTML = '';
 }
