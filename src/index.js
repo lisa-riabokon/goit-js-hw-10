@@ -1,8 +1,6 @@
 // підключення бібліотек
 // npm i --save lodash.debounce
-import debounce from 'lodash.debounce';
 // npm i notiflix
-import Notiflix from 'notiflix';
 import Notiflix from 'notiflix';
 import debounce from 'lodash.debounce';
 import './css/styles.css';
@@ -62,6 +60,7 @@ function onFormSearch(evt) {
     } else {
       refs.listEl.innerHTML = '';
       refs.cardEl.innerHTML = '';
+      Notiflix.Notify.failure('Oops, there is no country with that name');
     }
 
     function renderCountryList(ID) {
@@ -78,8 +77,32 @@ function onFormSearch(evt) {
   }
 }
 
-function renderOneCountry() {}
+function renderOneCountry(countryID) {
+  console.log(countryID);
+  const languageInCountry = Object.values(countyID[0].languages).join(',');
 
-function onFetchError(error) {}
+  const markup = `
+  <ul class="country-list">
+  <div class="country-info country-item">
+        <img class="flag" src="${ID[i].flags.svg}" alt="" width="90">
+        <h2 class="title">${ID[i].name.official}<h/2>
+        </div>
+        <div class="country-info country-item">Capital: ${countyID[0].capital}<p></p></div>
+        <div class="country-info country-item">Population: ${countyID[0].population}<p></p></div>
+        <div class="country-info country-item">Languages: ${languageInCountry}<p></p></div>
+        </ul>`;
 
-function onListError(error) {}
+  refs.cardEl.innerHTML = markup;
+}
+
+function onFetchError(error) {
+  refs.listEl.innerHTML = '';
+  refs.cardEl.innerHTML = '';
+  Notiflix.Notify.failure('Oops, there is no country with that name');
+}
+
+function onListError(error) {
+  refs.listEl.innerHTML = '';
+  refs.cardEl.innerHTML = '';
+  Notiflix.Notify.failure('Oops, there is no country with that name');
+}
